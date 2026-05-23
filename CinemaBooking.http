@@ -1,0 +1,64 @@
+@CinemaBooking_HostAddress = https://localhost:7223
+
+### список кінопоказів без автентифікації
+GET {{CinemaBooking_HostAddress}}/movies
+Accept: application/json
+
+### деталі кінопоказу за ід
+GET {{CinemaBooking_HostAddress}}/movies/1
+Accept: application/json
+
+### неіснуючий кінопоказ має повернути 404
+GET {{CinemaBooking_HostAddress}}/movies/999
+Accept: application/json
+
+### cookie автентифікація
+
+### реєстрація нового користувача
+POST {{CinemaBooking_HostAddress}}/auth/register
+Content-Type: application/json
+
+{"email": "test@gmail.com", "password": "password123", "name": "Тест Юзер"}
+
+### логін через cookie
+POST {{CinemaBooking_HostAddress}}/auth/login
+Content-Type: application/json
+
+{"email": "test@gmail.com", "password": "password123"}
+
+### бронювання без куки має повернути 401
+GET {{CinemaBooking_HostAddress}}/bookings
+Accept: application/json
+
+### створення бронювання без куки має повернути 401
+POST {{CinemaBooking_HostAddress}}/bookings/create
+Content-Type: application/json
+
+{"movieShowId": 1, "numberOfSeats": 2}
+
+### вихід з системи
+POST {{CinemaBooking_HostAddress}}/auth/logout
+
+### jwt автентифікація
+
+### реєстрація через jwt отримуємо токен у відповіді
+POST {{CinemaBooking_HostAddress}}/jwt/register
+Content-Type: application/json
+
+{"email": "jwt@gmail.com", "password": "password123", "name": "JWT Юзер"}
+
+### логін через jwt отримуємо токен у відповіді
+POST {{CinemaBooking_HostAddress}}/jwt/login
+Content-Type: application/json
+
+{"email": "jwt@gmail.com", "password": "password123"}
+
+### бронювання без токена має повернути 401
+GET {{CinemaBooking_HostAddress}}/jwt/bookings
+Accept: application/json
+
+### створення бронювання без токена має повернути 401
+POST {{CinemaBooking_HostAddress}}/jwt/bookings/create
+Content-Type: application/json
+
+{"movieShowId": 2, "numberOfSeats": 1}

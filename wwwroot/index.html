@@ -1,0 +1,480 @@
+﻿<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CinemaBooking</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            padding: 20px 0;
+            font-size: 24px;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 8px 16px;
+            border: 1px solid #999;
+            background: #fff;
+            color: #333;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+            .tab.active {
+                background: #333;
+                color: #fff;
+                border-color: #333;
+            }
+
+            .tab:not(.active):hover {
+                background: #eee;
+            }
+
+        .section {
+            display: none;
+        }
+
+            .section.active {
+                display: block;
+            }
+
+        .card {
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            margin-bottom: 8px;
+            font-size: 14px;
+            background: #fff;
+        }
+
+        button {
+            padding: 8px 16px;
+            border: 1px solid #333;
+            background: #333;
+            color: #fff;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+            button.secondary {
+                background: #fff;
+                color: #333;
+            }
+
+            button:hover {
+                opacity: 0.85;
+            }
+
+        .message {
+            padding: 8px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            font-size: 13px;
+        }
+
+            .message.error {
+                border-color: #999;
+                background: #f9f9f9;
+            }
+
+            .message.success {
+                border-color: #333;
+                background: #fff;
+            }
+
+        .movie-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+            .movie-item:last-child {
+                border-bottom: none;
+            }
+
+        label {
+            font-size: 13px;
+            color: #666;
+            display: block;
+            margin-bottom: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CinemaBooking</h1>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('movies', this)">фільми</button>
+            <button class="tab" onclick="showTab('cookie', this)">cookie автентифікація</button>
+            <button class="tab" onclick="showTab('jwt', this)">jwt автентифікація</button>
+        </div>
+
+        <!-- фільми -->
+        <div id="movies" class="section active">
+            <div class="card">
+                <h2>список кінопоказів</h2>
+                <div id="movies-list" style="margin-top: 12px;"></div>
+            </div>
+        </div>
+
+        <!-- cookie -->
+        <div id="cookie" class="section">
+            <div class="card">
+                <h2>реєстрація</h2>
+                <label>ім'я</label>
+                <input id="c-name" placeholder="ваше ім'я" />
+                <label>email</label>
+                <input id="c-email" type="email" placeholder="email" />
+                <label>пароль</label>
+                <input id="c-password" type="password" placeholder="пароль" />
+                <button onclick="cookieRegister()">зареєструватись</button>
+                <div id="c-register-msg"></div>
+            </div>
+
+            <div class="card">
+                <h2>логін</h2>
+                <label>email</label>
+                <input id="c-login-email" type="email" placeholder="email" />
+                <label>пароль</label>
+                <input id="c-login-password" type="password" placeholder="пароль" />
+                <button onclick="cookieLogin()">увійти</button>
+                <button class="secondary" onclick="cookieLogout()" style="margin-left: 8px;">вийти</button>
+                <div id="c-login-msg"></div>
+            </div>
+
+            <div class="card">
+                <h2>мої бронювання</h2>
+                <button onclick="loadCookieBookings()">завантажити</button>
+                <div id="c-bookings-list" style="margin-top: 12px;"></div>
+            </div>
+
+            <div class="card">
+                <h2>створити бронювання</h2>
+                <label>фільм</label>
+                <select id="c-movie-id">
+                    <option value="">оберіть фільм...</option>
+                </select>
+                <label>кількість місць</label>
+                <input id="c-seats" type="number" placeholder="кількість місць" />
+                <button onclick="cookieCreateBooking()">забронювати</button>
+                <div id="c-booking-msg"></div>
+            </div>
+        </div>
+
+        <!-- jwt -->
+        <div id="jwt" class="section">
+            <div class="card">
+                <h2>реєстрація</h2>
+                <label>ім'я</label>
+                <input id="j-name" placeholder="ваше ім'я" />
+                <label>email</label>
+                <input id="j-email" type="email" placeholder="email" />
+                <label>пароль</label>
+                <input id="j-password" type="password" placeholder="пароль" />
+                <button onclick="jwtRegister()">зареєструватись</button>
+                <div id="j-register-msg"></div>
+            </div>
+
+            <div class="card">
+                <h2>логін</h2>
+                <label>email</label>
+                <input id="j-login-email" type="email" placeholder="email" />
+                <label>пароль</label>
+                <input id="j-login-password" type="password" placeholder="пароль" />
+                <button onclick="jwtLogin()">увійти</button>
+                <button class="secondary" onclick="jwtLogout()" style="margin-left: 8px;">вийти</button>
+                <div id="j-login-msg"></div>
+                <div id="j-token-display" style="margin-top: 8px; font-size: 12px; color: #666;"></div>
+            </div>
+
+            <div class="card">
+                <h2>мої бронювання</h2>
+                <button onclick="loadJwtBookings()">завантажити</button>
+                <div id="j-bookings-list" style="margin-top: 12px;"></div>
+            </div>
+
+            <div class="card">
+                <h2>створити бронювання</h2>
+                <label>фільм</label>
+                <select id="j-movie-id">
+                    <option value="">оберіть фільм...</option>
+                </select>
+                <label>кількість місць</label>
+                <input id="j-seats" type="number" placeholder="кількість місць" />
+                <button onclick="jwtCreateBooking()">забронювати</button>
+                <div id="j-booking-msg"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const api = 'https://localhost:7223';
+        let jwtToken = localStorage.getItem('jwtToken') || '';
+
+        if (jwtToken) {
+            document.getElementById('j-token-display').textContent = 'токен збережено в localStorage';
+        }
+
+        function showTab(name, btn) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(name).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        function showMsg(id, text, isError) {
+            const el = document.getElementById(id);
+            el.className = 'message ' + (isError ? 'error' : 'success');
+            el.textContent = text;
+        }
+
+        // завантаження фільмів при старті
+        async function loadMovies() {
+            const res = await fetch(`${api}/movies`);
+            const data = await res.json();
+
+            // список фільмів
+            const list = document.getElementById('movies-list');
+            list.innerHTML = data.map(m => `
+                <div class="movie-item">
+                    <strong>${m.title}</strong><br>
+                    <small>початок: ${new Date(m.startTime).toLocaleString('uk')}</small><br>
+                    <small>тривалість: ${m.duration}</small><br>
+                    <small>вільних місць: ${m.availableSeats}</small>
+                </div>
+            `).join('');
+
+            // заповнюємо select у обох секціях
+            const options = data.map(m => `<option value="${m.id}">${m.title}</option>`).join('');
+            document.getElementById('c-movie-id').innerHTML = '<option value="">оберіть фільм...</option>' + options;
+            document.getElementById('j-movie-id').innerHTML = '<option value="">оберіть фільм...</option>' + options;
+        }
+
+        loadMovies();
+
+        // cookie
+        async function cookieRegister() {
+            const res = await fetch(`${api}/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    name: document.getElementById('c-name').value,
+                    email: document.getElementById('c-email').value,
+                    password: document.getElementById('c-password').value
+                })
+            });
+            const data = await res.json();
+            showMsg('c-register-msg', data.message, !data.success);
+        }
+
+        async function cookieLogin() {
+            const res = await fetch(`${api}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    email: document.getElementById('c-login-email').value,
+                    password: document.getElementById('c-login-password').value
+                })
+            });
+            const data = await res.json();
+            showMsg('c-login-msg', data.message, !data.success);
+        }
+
+        async function cookieLogout() {
+            const res = await fetch(`${api}/auth/logout`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+            const data = await res.json();
+            showMsg('c-login-msg', data.message, !data.success);
+        }
+
+        async function loadCookieBookings() {
+            const res = await fetch(`${api}/bookings`, {
+                credentials: 'include'
+            });
+            if (res.status === 401) {
+                document.getElementById('c-bookings-list').textContent = 'потрібно увійти в систему';
+                return;
+            }
+            const data = await res.json();
+            const list = document.getElementById('c-bookings-list');
+            if (data.length === 0) {
+                list.textContent = 'бронювань немає';
+                return;
+            }
+            list.innerHTML = data.map(b => `
+                <div class="movie-item">
+                    <strong>${b.movieTitle}</strong><br>
+                    <small>місць: ${b.numberOfSeats}</small><br>
+                    <small>час: ${new Date(b.bookingTime).toLocaleString('uk')}</small>
+                </div>
+            `).join('');
+        }
+
+        async function cookieCreateBooking() {
+            const movieId = document.getElementById('c-movie-id').value;
+            if (!movieId) {
+                showMsg('c-booking-msg', 'оберіть фільм', true);
+                return;
+            }
+            const res = await fetch(`${api}/bookings/create`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    movieShowId: parseInt(movieId),
+                    numberOfSeats: parseInt(document.getElementById('c-seats').value)
+                })
+            });
+            if (res.status === 401) {
+                showMsg('c-booking-msg', 'потрібно увійти в систему', true);
+                return;
+            }
+            if (res.ok) {
+                showMsg('c-booking-msg', 'заброньовано', false);
+            } else {
+                const data = await res.json();
+                showMsg('c-booking-msg', data, true);
+            }
+        }
+
+        // jwt
+        async function jwtRegister() {
+            const res = await fetch(`${api}/jwt/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: document.getElementById('j-name').value,
+                    email: document.getElementById('j-email').value,
+                    password: document.getElementById('j-password').value
+                })
+            });
+            const data = await res.json();
+            if (data.token) {
+                jwtToken = data.token;
+                localStorage.setItem('jwtToken', jwtToken);
+                document.getElementById('j-token-display').textContent = 'токен збережено в localStorage';
+            }
+            showMsg('j-register-msg', data.message, !data.success);
+        }
+
+        async function jwtLogin() {
+            const res = await fetch(`${api}/jwt/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: document.getElementById('j-login-email').value,
+                    password: document.getElementById('j-login-password').value
+                })
+            });
+            const data = await res.json();
+            if (data.token) {
+                jwtToken = data.token;
+                localStorage.setItem('jwtToken', jwtToken);
+                document.getElementById('j-token-display').textContent = 'токен збережено в localStorage';
+            }
+            showMsg('j-login-msg', data.message, !data.success);
+        }
+
+        function jwtLogout() {
+            jwtToken = '';
+            localStorage.removeItem('jwtToken');
+            document.getElementById('j-token-display').textContent = 'токен видалено';
+            showMsg('j-login-msg', 'вихід успішний', false);
+        }
+
+        async function loadJwtBookings() {
+            const res = await fetch(`${api}/jwt/bookings`, {
+                headers: { 'Authorization': `Bearer ${jwtToken}` }
+            });
+            if (res.status === 401) {
+                document.getElementById('j-bookings-list').textContent = 'потрібно увійти в систему';
+                return;
+            }
+            const data = await res.json();
+            const list = document.getElementById('j-bookings-list');
+            if (data.length === 0) {
+                list.textContent = 'бронювань немає';
+                return;
+            }
+            list.innerHTML = data.map(b => `
+                <div class="movie-item">
+                    <strong>${b.movieTitle}</strong><br>
+                    <small>місць: ${b.numberOfSeats}</small><br>
+                    <small>час: ${new Date(b.bookingTime).toLocaleString('uk')}</small>
+                </div>
+            `).join('');
+        }
+
+        async function jwtCreateBooking() {
+            const movieId = document.getElementById('j-movie-id').value;
+            if (!movieId) {
+                showMsg('j-booking-msg', 'оберіть фільм', true);
+                return;
+            }
+            const res = await fetch(`${api}/jwt/bookings/create`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${jwtToken}`
+                },
+                body: JSON.stringify({
+                    movieShowId: parseInt(movieId),
+                    numberOfSeats: parseInt(document.getElementById('j-seats').value)
+                })
+            });
+            if (res.status === 401) {
+                showMsg('j-booking-msg', 'потрібно увійти в систему', true);
+                return;
+            }
+            if (res.ok) {
+                showMsg('j-booking-msg', 'заброньовано', false);
+            } else {
+                const data = await res.json();
+                showMsg('j-booking-msg', data, true);
+            }
+        }
+    </script>
+</body>
+</html>
